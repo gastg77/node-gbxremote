@@ -17,14 +17,15 @@ var client = xmlrpc.createClient(5000, '192.168.1.3', function(err) {
 				// Results of the method response
 				console.log('Method response for "GetVersion": ', value);
 				
-				setTimeout(speedTest, 2000);
+				// Go crazy!
+				for (var i = 0; i < 200; i++)
+					setTimeout(speedTest, 1000 + i*10);
 			}
 		});
-		
-		
-		
 	}
 });
+
+
 
 
 var speedTest = function() {
@@ -42,17 +43,16 @@ var speedTest = function() {
 		'GetServerComment'
 	];
 	
-	console.log('Speedtest!!!');
+	var start = +new Date();
 	
 	var answers = {};
 	commands.forEach(function(method) {
 		client.methodCall(method, null, function(error, value) {
 			answers[method] = value;
-			console.log(method, value);
+			
+			if (Object.keys(answers).length == commands.length) {
+				console.log('Got all (%d) answers - Took %dms', commands.length, +new Date() - start);
+			}
 		});
 	});
-	
-	setTimeout(function() {
-		console.log("all answers:", answers);
-	}, 2000);
 };
