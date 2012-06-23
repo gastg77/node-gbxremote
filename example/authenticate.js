@@ -1,11 +1,11 @@
-var xmlrpc = require('../lib/xmlrpc.js');
+var gbxremote = require('../lib/gbxremote.js');
 
 
-var client = xmlrpc.createClient(5000, '192.168.1.3', function(err) {
+var client = gbxremote.createClient(5000, 'localhost', function(err) {
 	if (err) {
-		console.log(err);
+		// console.log(err);
 	} else {
-		run();
+		// run();
 	}
 });
 
@@ -14,7 +14,7 @@ client.on('error', function(err) {
 })
 
 .on('connect', function() {
-	console.log("EVENT: connect")
+	run();
 });
 
 
@@ -27,6 +27,9 @@ function run() {
 		} else {
 			if (result === true) {
 				console.log("Authenticated!");
+				
+				// Disconnect
+				client.terminate();
 			}
 		}
 	});

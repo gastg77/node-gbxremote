@@ -1,21 +1,21 @@
-{ "name" : "xmlrpc"
-, "description" : "A pure JavaScript XML-RPC client and server."
-, "keywords" : [ "xml-rpc", "xmlrpc", "xml", "rpc" ]
-, "version" : "1.0.1"
+{ "name" : "gbxremote"
+, "description" : "A pure JavaScript GBXRemote client."
+, "keywords" : [ "xml-rpc", "xmlrpc", "xml", "rpc", "gbxremote", "trackmania" ]
+, "version" : "0.1.0"
 , "preferGlobal" : false
-, "homepage" : "https://github.com/baalexander/node-xmlrpc"
-, "author" : "Brandon Alexander <baalexander@gmail.com> (https://github.com/baalexander)"
+, "homepage" : "https://github.com/MiniGod/node-gbxremote"
+, "author" : "Kristjan Broder Lund <kristjan.1234@gmail.com> (https://github.com/MiniGod)"
 , "repository" : {
     "type" : "git"
-  , "url" : "git://github.com/baalexander/node-xmlrpc.git"
+  , "url" : "git://github.com/MiniGod/node-gbxremote.git"
   }
 , "bugs" : {
-    "url" : "https://github.com/baalexander/node-xmlrpc/issues"
+    "url" : "https://github.com/MiniGod/node-gbxremote/issues"
   }
 , "directories" : {
     "lib" : "./lib"
   }
-, "main" : "./lib/xmlrpc.js"
+, "main" : "./lib/gbxremote.js"
 , "dependencies" : {
     "sax"   : "0.4.x"
   , "xmlbuilder" : "0.3.1"
@@ -32,7 +32,7 @@
   }
 , "licenses" : [ {
       "type" : "MIT"
-    , "url" : "https://github.com/baalexander/node-xmlrpc/raw/master/LICENSE"
+    , "url" : "https://github.com/MiniGod/node-gbxremote/raw/master/LICENSE"
     }
   ]
 }

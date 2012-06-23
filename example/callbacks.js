@@ -1,13 +1,7 @@
-var xmlrpc = require('../lib/xmlrpc.js');
+var gbxremote = require('../lib/gbxremote.js');
 
 
-var client = xmlrpc.createClient(5000, '192.168.1.3', function(err) {
-	if (err) {
-		// console.log(err);
-	} else {
-		// run();
-	}
-});
+var client = gbxremote.createClient(5000);
 
 client
 
