@@ -1,80 +1,196 @@
-## The What
+Node-GbxRemote
+===
 
-The xmlrpc module is a pure JavaScript XML-RPC server and client for node.js.
+JavaScript ([node.js](http://nodejs.org)) port of [GbxRemote](http://code.google.com/p/manialive/source/browse/trunk/libraries/DedicatedApi/Xmlrpc/Client.php) by [Nadeo](http://www.nadeo.com),
+which is built on [Incutio XML-RPC Library](http://scripts.incutio.com/xmlrpc/).
 
-Pure JavaScript means that the [XML parsing](https://github.com/isaacs/sax-js)
-and [XML building](https://github.com/robrighter/node-xml) use pure JavaScript
-libraries, so no extra C dependencies or build requirements. The xmlrpc module
-can be used as an XML-RPC server, receiving method calls and responding with
-method responses, or as an XML-RPC client, making method calls and receiving
-method responses, or as both.
+Used to communicate with [ManiaPlanet](http://www.maniaplanet.com) servers.
 
+*Note: The API may, or may not change!*
 
-## The How
-
-### To Install
+Install
+---
 
 ```bash
-npm install xmlrpc
+npm install gbxremote
 ```
 
-### To Use
+To Use
+---
 
-The file client_server.js in the example directory has a nicely commented
-example of using xmlrpc as an XML-RPC server and client (they even talk to each
-other!).
+Look in [/examples/](https://github.com/MiniGod/node-gbxremote/tree/master/example) for all examples.
 
-A brief example:
+---
+
+The following examples expects that `var gbxremote = require('gbxremote')`.
+
+### Connecting:
+
+To connect to a server, use `var client = gbxremote.createClient(port, [host], [callback]);`
+
+*Examples of ways to connect to the server:*
 
 ```javascript
-var xmlrpc = require('xmlrpc')
+// Connect with port only
+var client = gbxremote.createClient(5000);
 
-// Creates an XML-RPC server to listen to XML-RPC method calls
-var server = xmlrpc.createServer({ host: 'localhost', port: 9090 })
+// Connect with port and hostname
+var client = gbxremote.createClient(5000, 'localhost');
 
-// Handle method calls by listening for events with the method call name
-server.on('anAction', function (err, params, callback) {
-  console.log('Method call params for \'anAction\': ' + params)
+// Connect with port and ip
+var client = gbxremote.createClient(5000, '127.0.0.1');
 
-  // ...perform an action...
+// Connect with port only, and a callback
+var client = gbxremote.createClient(5000, function(err) {
+	// This callback is called both on connect and on error so we should check it.
+	if (err) {
+		console.error('Could not connect to server:', err);
+	} else {
+		console.log('Connection to server was successfull! Ready to send queries..');
+	}
+});
 
-  // Send a method response with a value
-  callback(null, 'aResult')
-})
-console.log('XML-RPC server listening on port 9091')
-
-// Waits briefly to give the XML-RPC server time to start up and start
-// listening
-setTimeout(function () {
-  // Creates an XML-RPC client. Passes the host information on where to
-  // make the XML-RPC calls.
-  var client = xmlrpc.createClient({ host: 'localhost', port: 9090, path: '/'})
-
-  // Sends a method call to the XML-RPC server
-  client.methodCall('anAction', ['aParam'], function (error, value) {
-    // Results of the method response
-    console.log('Method response for \'anAction\': ' + value)
-  })
-
-}, 1000)
+// Connect with port, ip and a callback
+var client = gbxremote.createClient(5000, '127.0.0.1', function(err) {
+	// Callback...
+});
 ```
 
-Output from the example:
+### Querying:
 
-```
-XML-RPC server listening on port 9090
-Method call params for 'anAction': aParam
-Method response for 'anAction': aResult
+Queries are sent to the server by calling `client.query(method, [params], [callback]);`
+
+**Queries before the connect event has been emitted will be ignored!**
+
+[See the full list of methods.](http://methods.xaseco.org/methodstmc.php)
+
+```javascript
+var client = gbxremote.createClient(5000);
+
+client.on('connect', function() {
+	
+	// GetVersion does not take any params.
+	client.query('GetVersion', function(err, res) {
+		if (err) {
+			console.error('Error when querying server:', err);
+		} else {
+			console.log('Server version:', res.join(', '));
+		}
+	});
+	
+	// GetPlayerInfo takes 2 parameters, 1 optional.
+	// GetPlayerInfo(string login, [int compatibility])
+	client.query('GetPlayerInfo', ['minigod'], function(err, res) {
+		if (err) {
+			console.error('Error getting player info:', err);
+		} else {
+			console.log('Player info:');
+			console.log(res);
+		}
+	});
+});
 ```
 
-### To Test
+### Events:
+
+#### Event: connect
+
+Emitted when connection to the server is successfull.  
+Ready to receive queries!
+
+```javascript
+var client = gbxremote.createClient(5000);
+
+client.on('connect', function() {
+	console.log('Connection successfull! Lets do some queries!');
+	client.query('GetVersion', function(err, res) {
+		if (err)
+			console.log(err);
+		else
+			console.log(res);
+	});
+});
+```
+If there is a problem connecting, the 'connect' event will not be emitted, the 'error' event will be emitted with the exception.
+
+#### Event: error
+
+Emitted when:
+* Socket errors *(host not listening on that port, loose connection, ect.)*
+* Handshake fails *(host* ***is*** *listening on that port, but its not a ManiaPlanet (GbxRemote 2) server)*
+
+```javascript
+var client = gbxremote.createClient(80);
+
+client.on('error', function(err) {
+	console.error('Connection failed: ' + err);
+});
+```
+
+#### Event: callback
+
+After sending `EnableCallbacks(true)` to the server, it will send you callbacks when stuff happend on the server.  
+Eg:
+* ManiaPlanet.ServerStart
+* ManiaPlanet.ServerStop
+* ManiaPlanet.PlayerConnect
+* ManiaPlanet.PlayerChat
+
+[See the full list of callbacks](http://server.xaseco.org/callbacks2.php)
+
+```javascript
+var client = gbxremote.createClient(5000);
+
+client.on('connect', function() {
+	client.query('SetApiVersion', ['2012-06-19']);
+	client.query('EnableCallbacks', [true]);
+});
+
+client.on('callback', function(method, params) {
+	console.log("Callback from server: %s - %d params", method, params.length);
+	
+	// This would be the typical place to have a switch statement. Please dont do that. Use the events, as shown below.
+});
+```
+
+Callbacks will also emit seperate events for each method. It's hard to explain. Learn from example:
+
+```javascript
+var client = gbxremote.createClient(5000);
+
+client.on('connect', function() {
+	// Before enabling callbacks, make sure you set the latest API.
+	client.query('SetApiVersion', ['2012-06-19']);
+	client.query('EnableCallbacks', [true]);
+});
+
+// ManiaPlanet.PlayerConnect(string Login, bool IsSpectator);
+client.on('ManiaPlanet.PlayerConnect', function(params) {
+	console.log('%s just joined as a %s', params[0], params[1] ? 'spectator' : 'player');
+});
+
+// ManiaPlanet.PlayerDisconnect(string Login); 
+client.on('ManiaPlanet.PlayerDisconnect', function(params) {
+	console.log('%s left the server', params[0]);
+});
+```
+
+These events can basically take over the big switch statements that is normal in todays server controllers.
+
+Testing
+---
+
+*This section does not currently apply, because tests are not being maintained atm*  
+*Note: Tests have not been changed since fork, hence will not pass.*
+
+***TODO: Fix tests - Figure out how to do it with travis (and in general), since we need a running ManiaPlanet server to run tests - and we need to know*** *exactly* ***what the server will return.***
 
 [![Build
-Status](https://secure.travis-ci.org/baalexander/node-xmlrpc.png)](http://travis-ci.org/baalexander/node-xmlrpc)
+Status](https://secure.travis-ci.org/MiniGod/node-gbxremote.png)](http://travis-ci.org/MiniGod/node-gbxremote)
 
 XML-RPC must be precise so there are an extensive set of test cases in the test
 directory. [Vows](http://vowsjs.org/) is the testing framework and [Travis
-CI](http://travis-ci.org/baalexander/node-xmlrpc) is used for Continuous
+CI](http://travis-ci.org/MiniGod/node-gbxremote) is used for Continuous
 Integration.
 
 To run the test suite:
@@ -84,7 +200,8 @@ To run the test suite:
 If submitting a bug fix, please update the appropriate test file too.
 
 
-## The License (MIT)
+The License (MIT)
+---
 
 Released under the MIT license. See the LICENSE file for the complete wording.
 
