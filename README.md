@@ -91,9 +91,13 @@ client.on('connect', function() {
 });
 ```
 
+### Disconnecting:
+
+`client.terminate();`
+
 ### Events:
 
-#### Event: connect
+#### Event: connect()
 
 Emitted when connection to the server is successfull.  
 Ready to receive queries!
@@ -113,10 +117,10 @@ client.on('connect', function() {
 ```
 If there is a problem connecting, the 'connect' event will not be emitted, the 'error' event will be emitted with the exception.
 
-#### Event: error
+#### Event: error(err)
 
 Emitted when:
-* Socket errors *(host not listening on that port, loose connection, ect.)*
+* Socket errors *(host is not listening on that port, loose connection, etc.)*
 * Handshake fails *(host* ***is*** *listening on that port, but its not a ManiaPlanet (GbxRemote 2) server)*
 
 ```javascript
@@ -127,14 +131,14 @@ client.on('error', function(err) {
 });
 ```
 
-#### Event: callback
+#### Event: callback(method, params)
 
 After sending `EnableCallbacks(true)` to the server, it will send you callbacks when stuff happend on the server.  
 Eg:
-* ManiaPlanet.ServerStart
-* ManiaPlanet.ServerStop
-* ManiaPlanet.PlayerConnect
-* ManiaPlanet.PlayerChat
+* `ManiaPlanet.ServerStart`
+* `ManiaPlanet.ServerStop`
+* `ManiaPlanet.PlayerConnect`
+* `ManiaPlanet.PlayerChat`
 
 [See the full list of callbacks](http://server.xaseco.org/callbacks2.php)
 
@@ -153,7 +157,9 @@ client.on('callback', function(method, params) {
 });
 ```
 
-Callbacks will also emit seperate events for each method. It's hard to explain. Learn from example:
+#### Event: \<method\>(params)
+
+Callbacks will also emit separate events for each method. It's hard to explain. Learn from example:
 
 ```javascript
 var client = gbxremote.createClient(5000);
@@ -176,6 +182,28 @@ client.on('ManiaPlanet.PlayerDisconnect', function(params) {
 ```
 
 These events can basically take over the big switch statements that is normal in todays server controllers.
+
+#### Event: close(had_error)
+
+Emitted once the socket is fully closed.
+The argument had_error is a boolean which says if the socket was closed due to a transmission error.
+
+```javascript
+var client = gbxremote.createClient(5000);
+
+client.on('connect', function() {
+	// Connected...
+	
+	// Do stuff?
+	
+	// Disconnect
+	client.terminate();
+});
+
+client.on('close', function(had_error) {
+	console.log('Connection to the server has been closed');
+});
+``` 
 
 Testing
 ---
