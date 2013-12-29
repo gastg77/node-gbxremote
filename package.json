@@ -19,6 +19,7 @@
 , "dependencies" : {
     "sax"   : "0.4.x"
   , "xmlbuilder" : "0.3.1"
+  , "barse" : "~0.4.1"
   }
 , "devDependencies" : {
     "vows" : "0.6.x"
