@@ -60,7 +60,7 @@ var client = gbxremote.createClient(5000, '127.0.0.1', function(err) {
 
 Queries are sent to the server by calling `client.query(method, [params], [callback]);`
 
-**Queries before the connect event has been emitted will be ignored!**
+*Queries before the connect event has been emitted will be queued and sent on connect!*
 
 [See the full list of methods.](http://methods.xaseco.org/methodstmc.php)
 
