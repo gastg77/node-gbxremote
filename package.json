@@ -1,7 +1,7 @@
 { "name" : "gbxremote"
 , "description" : "A pure JavaScript GBXRemote client."
 , "keywords" : [ "xml-rpc", "xmlrpc", "xml", "rpc", "gbxremote", "maniaplanet", "trackmania", "shootmania", "questmania", "nadeo" ]
-, "version" : "0.1.2"
+, "version" : "0.1.3"
 , "preferGlobal" : false
 , "homepage" : "https://github.com/MiniGod/node-gbxremote"
 , "author" : "Kristjan Broder Lund <kristjan.1234@gmail.com> (https://github.com/MiniGod)"
