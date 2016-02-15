@@ -9,17 +9,15 @@ client.on('connect', function() {
 	client.query('EnableCallbacks', [true]);
 	
 	// Authenticate so that we can send chat messages - SuperAdmin is not needed to chat, just Admin...
-	client.query('Authenticate', ['Admin', 'Admin'], function(err, res) {
+	client.query('Authenticate', ['Admin', 'Admin']).then(function(res) {
 		if (res === true) {
 			// Listen to stdin
 			process.stdin.resume();
 			process.stdin.setEncoding('utf8');
 			
 			process.stdin.on('data', function (chunk) {
-				client.query('ChatSend', [chunk.trim()], function(err) {
-					if (err) {
-						console.error('Error occured when sending chat message!');
-					}
+				client.query('ChatSend', [chunk.trim()]).catch(function(err) {
+					console.error('Error occured when sending chat message!');
 				});
 			});
 			
@@ -27,6 +25,11 @@ client.on('connect', function() {
 		} else {
 			console.log('*** Could not authenticate to server. You can read but not write!');
 		}
+	})
+	.catch(function(err) {
+		console.error('*** Error when trying to authenticate:');
+		console.error(err);
+		client.terminate();
 	});
 });
 

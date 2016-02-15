@@ -7,16 +7,15 @@ client.on('error', function(err) {
 })
 
 .on('connect', function() {
+
 	// Authenticate(string user, string password)
-	client.query("Authenticate", ["SuperAdmin", "SuperAdmin"], function(err, res) {
-		if (err) {
-			console.log(err);
-		} else {
-			if (res === true) {
-				console.log("Authenticated!");
-			}
+	client.query("Authenticate", ["SuperAdmin", "SuperAdmin"]).then(function(res) {
+		if (res === true) {
+			console.log("Authenticated!");
 		}
-		
+	}).catch(function(err) {
+		console.log('error:', err);
+	}).then(function() {
 		// Disconnect
 		client.terminate();
 	});
