@@ -26,39 +26,32 @@ The following examples expects that `var gbxremote = require('gbxremote')`.
 
 ### Connecting:
 
-To connect to a server, use `var client = gbxremote.createClient(port, [host], [callback]);`
+To connect to a server, use `var client = gbxremote.createClient(port, [host]);`
 
 *Examples of ways to connect to the server:*
 
 ```javascript
 // Connect with port only
 var client = gbxremote.createClient(5000);
+client.on('connect', onConnect);
 
 // Connect with port and hostname
 var client = gbxremote.createClient(5000, 'localhost');
+client.on('connect', onConnect);
 
 // Connect with port and ip
 var client = gbxremote.createClient(5000, '127.0.0.1');
+client.on('connect', onConnect);
 
-// Connect with port only, and a callback
-var client = gbxremote.createClient(5000, function(err) {
-	// This callback is called both on connect and on error so we should check it.
-	if (err) {
-		console.error('Could not connect to server:', err);
-	} else {
-		console.log('Connection to server was successfull! Ready to send queries..');
-	}
-});
-
-// Connect with port, ip and a callback
-var client = gbxremote.createClient(5000, '127.0.0.1', function(err) {
-	// Callback...
-});
+// Create client and connect explicitly
+var client = new gbxremote.Client(5000, 'localhost');
+client.connect().then(onConnect);
 ```
 
 ### Querying:
 
-Queries are sent to the server by calling `client.query(method, [params], [callback]);`
+Queries are sent to the server by calling `client.query(method, [params]);`  
+`client.query` returns a promise.
 
 *Queries before the connect event has been emitted will be queued and sent on connect!*
 
@@ -68,25 +61,21 @@ Queries are sent to the server by calling `client.query(method, [params], [callb
 var client = gbxremote.createClient(5000);
 
 client.on('connect', function() {
-	
+
 	// GetVersion does not take any params.
-	client.query('GetVersion', function(err, res) {
-		if (err) {
-			console.error('Error when querying server:', err);
-		} else {
-			console.log('Server version:', res.join(', '));
-		}
+	client.query('GetVersion').then(function (res) {
+		console.log('Server version:', res.join(', '));
+	}).catch(function(err) {
+		console.error('Error when querying server:', err);
 	});
 	
 	// GetPlayerInfo takes 2 parameters, 1 optional.
 	// GetPlayerInfo(string login, [int compatibility])
-	client.query('GetPlayerInfo', ['minigod'], function(err, res) {
-		if (err) {
-			console.error('Error getting player info:', err);
-		} else {
-			console.log('Player info:');
-			console.log(res);
-		}
+	client.query('GetPlayerInfo', ['minigod']).then(function (res) {
+		console.log('Player info:');
+		console.log(res);
+	}).catch(function (err) {
+		console.error('Error getting player info:', err);
 	});
 });
 ```
@@ -107,12 +96,7 @@ var client = gbxremote.createClient(5000);
 
 client.on('connect', function() {
 	console.log('Connection successfull! Lets do some queries!');
-	client.query('GetVersion', function(err, res) {
-		if (err)
-			console.log(err);
-		else
-			console.log(res);
-	});
+	client.query('EnableCallbacks', true);
 });
 ```
 If there is a problem connecting, the 'connect' event will not be emitted, the 'error' event will be emitted with the exception.
@@ -124,7 +108,7 @@ Emitted when:
 * Handshake fails *(host* ***is*** *listening on that port, but its not a ManiaPlanet (GbxRemote 2) server)*
 
 ```javascript
-var client = gbxremote.createClient(80);
+var client = gbxremote.createClient(5000);
 
 client.on('error', function(err) {
 	console.error('Connection failed: ' + err);
@@ -204,29 +188,6 @@ client.on('close', function(had_error) {
 	console.log('Connection to the server has been closed');
 });
 ``` 
-
-Testing
----
-
-*This section does not currently apply, because tests are not being maintained atm*  
-*Note: Tests have not been changed since fork, hence will not pass.*
-
-***TODO: Fix tests - Figure out how to do it with travis (and in general), since we need a running ManiaPlanet server to run tests - and we need to know*** *exactly* ***what the server will return.***
-
-[![Build
-Status](https://secure.travis-ci.org/MiniGod/node-gbxremote.png)](http://travis-ci.org/MiniGod/node-gbxremote)
-
-XML-RPC must be precise so there are an extensive set of test cases in the test
-directory. [Vows](http://vowsjs.org/) is the testing framework and [Travis
-CI](http://travis-ci.org/MiniGod/node-gbxremote) is used for Continuous
-Integration.
-
-To run the test suite:
-
-`make test`
-
-If submitting a bug fix, please update the appropriate test file too.
-
 
 The License (MIT)
 ---
