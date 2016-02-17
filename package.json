@@ -41,7 +41,7 @@
   },
   "scripts": {
     "watch": "nodemon -x npm test",
-    "test": "xo lib/*.js"
+    "test": "xo"
   },
   "engines": {
     "node": ">=0.10"
